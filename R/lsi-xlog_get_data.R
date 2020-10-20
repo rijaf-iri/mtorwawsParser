@@ -17,7 +17,8 @@ get.lsi.xlog <- function(timeR, dirLSIXLOG, dirAWS, dirUP = NULL,
     timeS <- format(timeR[1], "%Y%m%d%H")
     timeS <- strptime(timeS, "%Y%m%d%H", tz = "Africa/Kigali")
     timeList <- seq(timeS, timeR[2], "5 min")
-    timeList <- format(timeList, "%Y%m%d%H%M")
+    timeList <- time_local2utc_char(timeList, "%Y%m%d%H%M")
+    # timeList <- format(timeList, "%Y%m%d%H%M")
 
     stnAWS <- lapply(seq(nrow(listAWS)), function(jj){
         aws_path <- file.path(dirLSIXLOG, listAWS[jj, 1])
@@ -31,7 +32,7 @@ get.lsi.xlog <- function(timeR, dirLSIXLOG, dirAWS, dirUP = NULL,
         daty <- gsub("\\.txt$", "", listFiles)
         daty <- trimws(substr(daty, 7, 18))
 
-        daty <- strptime(daty, "%Y%m%d%H%M", tz = "Africa/Kigali")
+        daty <- strptime(daty, "%Y%m%d%H%M", tz = "UTC")
         list(id = listAWS[jj, 2], name = listAWS[jj, 1], daty = daty, files = listFiles)
     })
 

@@ -36,7 +36,7 @@ get.rema <- function(timeR, dirELAB, dirAWS, dirUP = NULL,
             return(-1)
         }
 
-        lastdaty <- utc2local(lastdaty[, 1], "%Y-%m-%d %H:%M")
+        lastdaty <- strptime(lastdaty[, 1], "%Y-%m-%d %H:%M", tz = "Africa/Kigali")
         lastdaty <- lastdaty[!is.na(lastdaty)]
 
         if(length(lastdaty) == 0){
@@ -49,7 +49,7 @@ get.rema <- function(timeR, dirELAB, dirAWS, dirUP = NULL,
 
         if(archive){
             firstdaty <- read.rema.elab(awsfile, nrows = 3)
-            firstdaty <- utc2local(firstdaty[, 1], "%Y-%m-%d %H:%M")
+            firstdaty <- strptime(firstdaty[, 1], "%Y-%m-%d %H:%M", tz = "Africa/Kigali")
             firstdaty <- firstdaty[!is.na(firstdaty)]
             firstdaty <- firstdaty[1]
 
@@ -75,7 +75,7 @@ get.rema <- function(timeR, dirELAB, dirAWS, dirUP = NULL,
                 don <- read.rema.elab(awsfile, nrows = nrows, skip = skip)
             }else{
                 don <- read.rema.elab(awsfile)
-                daty <- utc2local(don[, 1], "%Y-%m-%d %H:%M")
+                daty <- strptime(don[, 1], "%Y-%m-%d %H:%M", tz = "Africa/Kigali")
                 ix <- daty >= timeR[1] & daty <= timeR[2]
 
                 don <- don[ix, , drop = FALSE]

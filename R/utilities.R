@@ -1,9 +1,29 @@
 
-utc2local <- function(dates, format, tz = "Africa/Kigali"){
+char_utc2local_time <- function(dates, format, tz = "Africa/Kigali"){
     x <- strptime(dates, format, tz = "UTC")
     x <- as.POSIXct(x)
     x <- format(x, format, tz = tz)
     x <- strptime(x, format, tz = tz)
+    x
+}
+
+time_utc2local_char <- function(dates, format, tz = "Africa/Kigali"){
+    x <- as.POSIXct(dates)
+    x <- format(x, format, tz = tz)
+    x
+}
+
+char_local2utc_time <- function(dates, format, tz = "Africa/Kigali"){
+    x <- strptime(dates, format, tz = tz)
+    x <- as.POSIXct(x)
+    x <- format(x, format, tz = "UTC")
+    x <- strptime(x, format, tz = "UTC")
+    x
+}
+
+time_local2utc_char <- function(dates, format){
+    x <- as.POSIXct(dates)
+    x <- format(x, format, tz = "UTC")
     x
 }
 

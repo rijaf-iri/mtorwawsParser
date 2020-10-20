@@ -30,8 +30,10 @@ parse.lsi.xlog <- function(X, params, dirLSIXLOG, dirAWS,
     files.aws <- X$files
     if(file.exists(dirL$info)){
         info <- readRDS(dirL$info)
-        infostart <- strptime(info$start, "%Y%m%d%H%M%S", tz = "Africa/Kigali")
-        infoend <- strptime(info$end, "%Y%m%d%H%M%S", tz = "Africa/Kigali")
+        # infostart <- strptime(info$start, "%Y%m%d%H%M%S", tz = "Africa/Kigali")
+        # infoend <- strptime(info$end, "%Y%m%d%H%M%S", tz = "Africa/Kigali")
+        infostart <- char_local2utc_time(info$start, "%Y%m%d%H%M%S")
+        infoend <- char_local2utc_time(info$end, "%Y%m%d%H%M%S")
 
         if(!archive){
             idaty <- X$daty >= infoend
@@ -99,8 +101,8 @@ parse.lsi.xlog <- function(X, params, dirLSIXLOG, dirAWS,
             }
 
             id <- x[2]
-            daty <- strptime(paste0(x[3:8], collapse = ""), "%H%M%S%d%m%Y", tz = "Africa/Kigali")
-            daty <- format(daty, "%Y%m%d%H%M%S", tz = "Africa/Kigali")
+            daty <- strptime(paste0(x[3:8], collapse = ""), "%H%M%S%d%m%Y", tz = "UTC")
+            daty <- format(daty, "%Y%m%d%H%M%S", tz = "UTC")
 
             x <- x[-(1:8)]
             x <- x[-length(x)]
@@ -208,15 +210,17 @@ parse.lsi.xlog <- function(X, params, dirLSIXLOG, dirAWS,
     # daty <- daty[order(daty)]
     # ndt <- length(daty)
 
+    daty0 <- strptime(daty, "%Y%m%d%H%M%S", tz = "UTC")
+    daty <- time_utc2local_char(daty0, "%Y%m%d%H%M%S")
+
     if(!file.exists(dirL$info)){
-        daty0 <- strptime(daty, "%Y%m%d%H%M%S", tz = "Africa/Kigali")
         timestep <- as.numeric(names(which.max(table(diff(daty0)))))
         info <- list(id = stn.id, name = stn.name,
                      start = daty[1], end = daty[ndt],
                      vars = oldVars, tstep = timestep, updated = TRUE)
     }else{
         if(archive){
-            daty0 <- strptime(daty, "%Y%m%d%H%M%S", tz = "Africa/Kigali")
+            # daty0 <- strptime(daty, "%Y%m%d%H%M%S", tz = "UTC")
             if(infostart > daty0[1]) info$start <- daty[1]
             if(infoend < daty0[ndt]) info$end <- daty[ndt]
         }else{

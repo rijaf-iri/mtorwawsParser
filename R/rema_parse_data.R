@@ -26,7 +26,7 @@ parse.rema <- function(X, params, dirAWS, dirUP = NULL,
 
     logAWS <- file.path(dirAWS, "AWS_DATA", "REMA", "LOG", "AWS_LOG.txt")
 
-    daty <- utc2local(X$data[, 1], "%Y-%m-%d %H:%M")
+    daty <- strptime(X$data[, 1], "%Y-%m-%d %H:%M", tz = "Africa/Kigali")
     nadates <- is.na(daty)
     if(all(nadates)){
         msg <- paste("Invalid dates :", stn.id)
