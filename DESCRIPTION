@@ -1,0 +1,19 @@
+Package: mtorwawsParser
+Version: 2.0
+Title: Meteo Rwanda AWS Data Parsing
+Description: Process data from Meteo Rwanda AWS Networks: LSI type E-Log and X-Log, Netsens MeteoSense PRO (REMA). It fetches the data from Gidas database (LSI E-Log), parses data from the X-Log storage and reads the data from REMA's FTP server. The data are converted to an intermediate format and uploaded to the server "data-int". The functions can use in operational or archive mode.
+Author: Rija Faniriantsoa <rijaf@iri.columbia.edu>
+Maintainer: Rija Faniriantsoa <rijaf@iri.columbia.com>
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+NeedsCompilation: no
+Date: 2020-07-01
+Imports: 
+    ssh,
+    RODBC,
+    curl,
+    doParallel,
+    foreach,
+    R.utils,
+RoxygenNote: 7.1.0
