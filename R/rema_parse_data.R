@@ -100,11 +100,9 @@ parse.rema <- function(X, params, dirAWS, dirUP = NULL,
     names(nomVars) <- names(outdata)
     oldVars <- merge.all.variables(oldVars, nomVars)
 
-    ## replace parallel on archive mode
     parsL <- doparallel.cond(archive & length(daty) > 200)
 
     retLoop <- cdtforeach(seq_along(daty), parsL, FUN = function(tt){
-        # for(tt in seq_along(daty)){
         temps <- format(daty[tt], "%Y%m%d%H%M%S", tz = "Africa/Kigali")
         x <- lapply(outdata, "[[", tt)
         res_dat <- lapply(seq_along(x), function(j){
@@ -118,16 +116,9 @@ parse.rema <- function(X, params, dirAWS, dirUP = NULL,
         ina <- sapply(res_dat, is.na)
         if(all(ina)){
             file.log <- paste0(substr(temps, 1, 12), "_nodata.txt")
-            file.loc <- file.path(dirL$logLoc, file.log)
+            log.loc <- file.path(dirL$logLoc, file.log)
             msg <- paste("AWS :", stn.id, "\n", "No data for :", temps)
-            format.out.msg(msg, file.loc, FALSE)
-
-            if(upload){
-                file.up <- file.path(dirU$logUp, file.log)
-                ssh::scp_upload(session, file.loc, to = file.up, verbose = FALSE)
-            }
-
-            # next
+            format.out.msg(msg, log.loc, FALSE)
             return(NULL)
         }
 
@@ -135,15 +126,30 @@ parse.rema <- function(X, params, dirAWS, dirUP = NULL,
         out <- list(date = temps, data = res_dat)
 
         file.out <- paste0(temps, ".rds")
-        file.loc <- file.path(dirL$dataLoc, file.out)
-        saveRDS(out, file = file.loc)
+        data.loc <- file.path(dirL$dataLoc, file.out)
+        saveRDS(out, file = data.loc)
+
         if(upload){
-            file.up <- file.path(dirU$dataUp, file.out)
-            ssh::scp_upload(session, file.loc, to = file.up, verbose = FALSE)
+            log.up <- file.path(dirU$logUp, file.log)
+            data.up <- file.path(dirU$dataUp, file.out)
+            return(list(log = c(log.loc, log.up),
+                        data = c(data.loc, data.up))
+                  )
+        }else{
+            return(0)
         }
-        # }
-        return(0)
     })
+
+    inull <- sapply(retLoop, is.null)
+    retLoop <- retLoop[!inull]
+
+    if(upload){
+        upld <- lapply(retLoop, function(x){
+            ssh::scp_upload(session, x$log[1], to = x$log[2], verbose = FALSE)
+            ssh::scp_upload(session, x$data[1], to = x$data[2], verbose = FALSE)
+            return(0)
+        })
+    }
 
     ########################
 

@@ -51,46 +51,39 @@ parse.lsi.elog <- function(X, dirAWS, dirUP = NULL,
     ########################
 
     lpdaty <- split(seq_along(daty), daty)
-    
-    ## replace parallel on archive mode
     parsL <- doparallel.cond(archive & length(lpdaty) > 200)
 
     retLoop <- cdtforeach(seq_along(lpdaty), parsL, FUN = function(jj){
         ix <- lpdaty[[jj]]
-        # ret.don <- lapply(lpdaty, function(ix){
         xval <- X[ix, , drop = FALSE]
         temps <- daty[ix][1]
 
-        mrgVars <- split.lsi.elog(xval, temps, oldVars, 
-                                  dirL$dataLoc, dirL$logLoc, stn.id,
-                                  dirU$dataUp, dirU$logUp, session, upload)
-        # if(is.null(mrgVars)){
-        #     return(NULL)
-        # }else{
-        #     oldVars <<- mrgVars
-        # }
+        ret <- split.lsi.elog(xval, temps, oldVars, 
+                              dirL$dataLoc, dirL$logLoc, stn.id,
+                              dirU$dataUp, dirU$logUp, session, upload)
 
-        # return(0)
-        # })
-        return(mrgVars)
+        return(ret)
     })
 
     inull <- sapply(retLoop, is.null)
     if(all(inull)) return(NULL)
+    retLoop <- retLoop[!inull]
 
     daty <- names(lpdaty)[!inull]
     daty <- daty[order(daty)]
     ndt <- length(daty)
 
-    mrgVars <- retLoop[!inull]
+    mrgVars <- lapply(retLoop, '[[', 'nomVars')
     for(jj in seq_along(mrgVars))
         oldVars <- merge.all.variables(oldVars, mrgVars[[jj]])
 
-    # inull <- sapply(ret.don, is.null)
-    # if(all(inull)) return(NULL)
-    # daty <- names(ret.don)[!inull]
-    # daty <- daty[order(daty)]
-    # ndt <- length(daty)
+    if(upload){
+        uploadfiles <- lapply(retLoop, '[[', 'upload')
+        upld <- lapply(uploadfiles, function(x){
+            ssh::scp_upload(session, x$log[1], to = x$log[2], verbose = FALSE)
+            ssh::scp_upload(session, x$data[1], to = x$data[2], verbose = FALSE)
+        })
+    }
 
     ########################
 
@@ -137,7 +130,6 @@ split.lsi.elog <- function(xval, temps, oldVars,
     })
 
     nomVars <- lapply(res_dat, names)
-    # oldVars <- merge.all.variables(oldVars, nomVars)
 
     res_dat <- lapply(res_dat, function(x){
         ina <- is.na(x)
@@ -151,14 +143,9 @@ split.lsi.elog <- function(xval, temps, oldVars,
     inull <- sapply(res_dat, is.null)
     if(all(inull)){
         file.log <- paste0(substr(temps, 1, 12), "_nodata.txt")
-        file.loc <- file.path(dirLogLoc, file.log)
+        log.loc <- file.path(dirLogLoc, file.log)
         msg <- paste("AWS :", stnID, "\n", "No data for :", temps)
-        format.out.msg(msg, file.loc, FALSE)
-
-        if(upload){
-            file.up <- file.path(dirLogUp, file.log)
-            ssh::scp_upload(session, file.loc, to = file.up, verbose = FALSE)
-        }
+        format.out.msg(msg, log.loc, FALSE)
 
         return(NULL)
     }
@@ -166,13 +153,19 @@ split.lsi.elog <- function(xval, temps, oldVars,
     out <- list(date = temps, data = res_dat)
 
     file.out <- paste0(temps, ".rds")
-    file.loc <- file.path(dirDataLoc, file.out)
-    saveRDS(out, file = file.loc)
-    if(upload){
-        file.up <- file.path(dirDataUp, file.out)
-        ssh::scp_upload(session, file.loc, to = file.up, verbose = FALSE)
-    }
+    data.loc <- file.path(dirDataLoc, file.out)
+    saveRDS(out, file = data.loc)
 
-    # return(oldVars)
-    return(nomVars)
+    if(upload){
+        log.up <- file.path(dirLogUp, file.log)
+        data.up <- file.path(dirDataUp, file.out)
+        return(list(
+                nomVars = nomVars,
+                upload = list(log = c(log.loc, log.up),
+                              data = c(data.loc, data.up))
+                )
+              )
+    }else{
+        return(list(nomVars = nomVars, upload = NULL))
+    }
 }
