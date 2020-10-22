@@ -126,7 +126,7 @@ difftime10Min <- function(x, y){
 
 list.depth <- function(l){
     ret <- 0
-    if(is.list(l)){
+    if(is.list(l) && length(l) > 0){
         walk <- sapply(l, list.depth)
         ret <- 1 + max(walk)
     }

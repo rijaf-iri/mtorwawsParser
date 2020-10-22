@@ -261,3 +261,37 @@ download.rema <- function(dirAWS){
         }
     }
 }
+
+#' Upload log files to "data-int" server.
+#'
+#' Upload log files to "data-int" server.
+#' 
+#' @param dirAWS full path to the directory to store the parsed data.
+#'               Example: "E:/MeteoRwanda"
+#' @param dirUP full path to the directory to store the uploaded data in \code{data-int}.
+#' 
+#' @export
+
+upload.logFiles <- function(dirAWS, dirUP){
+    on.exit(ssh::ssh_disconnect(session))
+
+    ssh <- readRDS(file.path(dirAWS, "AWS_PARAMS", "data-int.cred"))
+    session <- try(do.call(ssh::ssh_connect, ssh$cred), silent = TRUE)
+    if(inherits(session, "try-error")) return(NULL)
+
+    netAWS <- c('REMA', 'LSI-XLOG', 'LSI-ELOG')
+    for (aws in netAWS){
+        dirLOC <- file.path(dirAWS, "AWS_DATA", aws, "LOG")
+        dirREM <- file.path(dirUP, aws, "LOG")
+
+        filesUp <- c("processing_log.txt", "UPLOAD_LOG.txt", "AWS_LOG.txt")
+        for(ff in filesUp){
+            f1 <- file.path(dirLOC, ff)
+            f2 <- file.path(dirREM, ff)
+            if(file.exists(f1))
+                ssh::scp_upload(session, f1, to = f2, verbose = FALSE)
+        }
+    }
+}
+
+

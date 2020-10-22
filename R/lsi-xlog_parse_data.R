@@ -243,11 +243,15 @@ parse.lsi.xlog <- function(X, params, dirLSIXLOG, dirAWS,
             lapply(x, '[[', 'log')
         })
 
-        if(list.depth(logUp) > 1)
-            logUp <- do.call(c, logUp)
-        if(length(logUp) > 0){
-            for(i in seq_along(logUp))
-                ssh::scp_upload(session, logUp[[i]][1], to = logUp[[i]][2], verbose = FALSE)
+        iL <- sapply(logUp, length) > 0
+        if(any(iL)){
+            logUp <- logUp[iL]
+            if(list.depth(logUp) > 1)
+                logUp <- do.call(c, logUp)
+            if(length(logUp) > 0){
+                for(i in seq_along(logUp))
+                    ssh::scp_upload(session, logUp[[i]][1], to = logUp[[i]][2], verbose = FALSE)
+            }
         }
     }
 
