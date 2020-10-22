@@ -36,7 +36,7 @@ parse.lsi.xlog <- function(X, params, dirLSIXLOG, dirAWS,
         if(!archive){
             daty0 <- time_utc2local_char(X$daty, "%Y%m%d%H%M%S")
             daty0 <- strptime(daty0, "%Y%m%d%H%M%S", tz = "Africa/Kigali")
-            idaty <- daty0 >= infoend
+            idaty <- daty0 >= infoend - 1800
             if(!any(idaty)){
                 updated <- FALSE
                 return("no.update")
@@ -210,7 +210,8 @@ parse.lsi.xlog <- function(X, params, dirLSIXLOG, dirAWS,
     if(all(ierror)){
         if(upload){
             logErr <- lapply(retLoop, '[[', 'log')
-            logErr <- do.call(c, logErr)
+            if(list.depth(logErr) > 1)
+                logErr <- do.call(c, logErr)
             for(i in seq_along(logErr))
                 ssh::scp_upload(session, logErr[[i]][1], to = logErr[[i]][2], verbose = FALSE)
         }
@@ -221,7 +222,8 @@ parse.lsi.xlog <- function(X, params, dirLSIXLOG, dirAWS,
     if(any(ierror) & upload){
         logErr <- retLoop[ierror]
         logErr <- lapply(logErr, '[[', 'log')
-        logErr <- do.call(c, logErr)
+        if(list.depth(logErr) > 1)
+            logErr <- do.call(c, logErr)
         for(i in seq_along(logErr))
             ssh::scp_upload(session, logErr[[i]][1], to = logErr[[i]][2], verbose = FALSE)
     }
@@ -231,7 +233,8 @@ parse.lsi.xlog <- function(X, params, dirLSIXLOG, dirAWS,
 
     if(upload){
         dataUp <- lapply(retLoop, '[[', 'dataUp')
-        dataUp <- do.call(c, dataUp)
+        if(list.depth(dataUp) > 1)
+            dataUp <- do.call(c, dataUp)
         for(i in seq_along(dataUp))
             ssh::scp_upload(session, dataUp[[i]][1], to = dataUp[[i]][2], verbose = FALSE)
 
@@ -239,7 +242,9 @@ parse.lsi.xlog <- function(X, params, dirLSIXLOG, dirAWS,
         logUp <- lapply(logUp, function(x){
             lapply(x, '[[', 'log')
         })
-        logUp <- do.call(c, logUp)
+
+        if(list.depth(logUp) > 1)
+            logUp <- do.call(c, logUp)
         if(length(logUp) > 0){
             for(i in seq_along(logUp))
                 ssh::scp_upload(session, logUp[[i]][1], to = logUp[[i]][2], verbose = FALSE)

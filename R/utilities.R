@@ -124,6 +124,16 @@ difftime10Min <- function(x, y){
     as.numeric(df) / 10
 }
 
+list.depth <- function(l){
+    ret <- 0
+    if(is.list(l)){
+        walk <- sapply(l, list.depth)
+        ret <- 1 + max(walk)
+    }
+
+    ret
+}
+
 ###################
 
 doparallel.cond <- function(condition,
