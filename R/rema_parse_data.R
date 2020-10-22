@@ -119,7 +119,12 @@ parse.rema <- function(X, params, dirAWS, dirUP = NULL,
             log.loc <- file.path(dirL$logLoc, file.log)
             msg <- paste("AWS :", stn.id, "\n", "No data for :", temps)
             format.out.msg(msg, log.loc, FALSE)
-            return(NULL)
+            if(upload){
+                log.up <- file.path(dirU$logUp, file.log)
+                return(list(log = c(log.loc, log.up), data = NULL))
+            }else{
+                return(0)
+            }
         }
 
         res_dat <- res_dat[!ina]
@@ -130,23 +135,19 @@ parse.rema <- function(X, params, dirAWS, dirUP = NULL,
         saveRDS(out, file = data.loc)
 
         if(upload){
-            log.up <- file.path(dirU$logUp, file.log)
             data.up <- file.path(dirU$dataUp, file.out)
-            return(list(log = c(log.loc, log.up),
-                        data = c(data.loc, data.up))
-                  )
+            return(list(data = c(data.loc, data.up), log = NULL))
         }else{
             return(0)
         }
     })
 
-    inull <- sapply(retLoop, is.null)
-    retLoop <- retLoop[!inull]
-
     if(upload){
         upld <- lapply(retLoop, function(x){
-            ssh::scp_upload(session, x$log[1], to = x$log[2], verbose = FALSE)
-            ssh::scp_upload(session, x$data[1], to = x$data[2], verbose = FALSE)
+            if(!is.null(x$log))
+                ssh::scp_upload(session, x$log[1], to = x$log[2], verbose = FALSE)
+            if(!is.null(x$data))
+                ssh::scp_upload(session, x$data[1], to = x$data[2], verbose = FALSE)
             return(0)
         })
     }

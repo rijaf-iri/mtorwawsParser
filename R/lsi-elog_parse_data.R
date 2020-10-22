@@ -65,11 +65,9 @@ parse.lsi.elog <- function(X, dirAWS, dirUP = NULL,
         return(ret)
     })
 
-    inull <- sapply(retLoop, is.null)
-    if(all(inull)) return(NULL)
-    retLoop <- retLoop[!inull]
+    ierror <- sapply(retLoop, '[[', 'error')
 
-    daty <- names(lpdaty)[!inull]
+    daty <- names(lpdaty)[!ierror]
     daty <- daty[order(daty)]
     ndt <- length(daty)
 
@@ -80,8 +78,10 @@ parse.lsi.elog <- function(X, dirAWS, dirUP = NULL,
     if(upload){
         uploadfiles <- lapply(retLoop, '[[', 'upload')
         upld <- lapply(uploadfiles, function(x){
-            ssh::scp_upload(session, x$log[1], to = x$log[2], verbose = FALSE)
-            ssh::scp_upload(session, x$data[1], to = x$data[2], verbose = FALSE)
+            if(!is.null(x$log))
+                ssh::scp_upload(session, x$log[1], to = x$log[2], verbose = FALSE)
+            if(!is.null(x$data))
+                ssh::scp_upload(session, x$data[1], to = x$data[2], verbose = FALSE)
         })
     }
 
@@ -147,7 +147,16 @@ split.lsi.elog <- function(xval, temps, oldVars,
         msg <- paste("AWS :", stnID, "\n", "No data for :", temps)
         format.out.msg(msg, log.loc, FALSE)
 
-        return(NULL)
+        if(upload){
+            log.up <- file.path(dirLogUp, file.log)
+            data.up <- file.path(dirDataUp, file.out)
+            return(list(error = TRUE,
+                        nomVars = nomVars,
+                        upload = list(log = c(log.loc, log.up), data = NULL))
+                    )
+        }else{
+            return(list(error = TRUE, nomVars = nomVars, upload = NULL))
+        }
     }
     res_dat <- res_dat[!inull]
     out <- list(date = temps, data = res_dat)
@@ -157,15 +166,12 @@ split.lsi.elog <- function(xval, temps, oldVars,
     saveRDS(out, file = data.loc)
 
     if(upload){
-        log.up <- file.path(dirLogUp, file.log)
         data.up <- file.path(dirDataUp, file.out)
-        return(list(
-                nomVars = nomVars,
-                upload = list(log = c(log.loc, log.up),
-                              data = c(data.loc, data.up))
+        return(list(error = FALSE,
+                    nomVars = nomVars,
+                    upload = list(data = c(data.loc, data.up), log = NULL))
                 )
-              )
     }else{
-        return(list(nomVars = nomVars, upload = NULL))
+        return(list(error = FALSE, nomVars = nomVars, upload = NULL))
     }
 }
