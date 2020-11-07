@@ -149,7 +149,6 @@ split.lsi.elog <- function(xval, temps, oldVars,
 
         if(upload){
             log.up <- file.path(dirLogUp, file.log)
-            data.up <- file.path(dirDataUp, file.out)
             return(list(error = TRUE,
                         nomVars = nomVars,
                         upload = list(log = c(log.loc, log.up), data = NULL))
