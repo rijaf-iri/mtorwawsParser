@@ -110,8 +110,10 @@ parse.lsi.xlog <- function(X, params, dirLSIXLOG, dirAWS,
 
             x <- x[-(1:8)]
             x <- x[-length(x)]
-            x[x == "-999990.00" | x == "-999999.00" | x == "-9999.0" | x == "-9999" | x == "*"] <- NA
+            # x[x == "-999990.00" | x == "-999999.00" | x == "-9999.0" | x == "-9999" | x == "*"] <- NA
+            x[x == "*"] <- NA
             x <- suppressWarnings(as.numeric(x))
+            x[x <= -99] <- NA
             x <- matrix(x, ncol = 3, byrow = TRUE)
 
             rd <- rle(x[, 1])
