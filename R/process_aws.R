@@ -21,9 +21,9 @@ process.lsi.elog <- function(dirAWS, dirUP = NULL, upload = TRUE)
         dir.create(dirLOG, showWarnings = FALSE, recursive = TRUE)
     logPROC <- file.path(dirLOG, "processing_log.txt")
 
-    ## operational last 6 hours
+    ## operational last 24 hours
     timeNow <- Sys.time()
-    timeLast <- timeNow - 21600
+    timeLast <- timeNow - 86400
     timeLast <- format(timeLast, "%Y-%m-%dT%H:%M:00")
     # discard invalid date
     timeNow <- format(timeNow + 60, "%Y-%m-%dT%H:%M:00")
@@ -98,9 +98,9 @@ process.lsi.xlog <- function(dirLSIXLOG, dirAWS, dirUP = NULL, upload = TRUE)
         dir.create(dirLOG, showWarnings = FALSE, recursive = TRUE)
     logPROC <- file.path(dirLOG, "processing_log.txt")
 
-    ## operational last 6 hours
+    ## operational last 24 hours
     timeNow <- Sys.time()
-    timePast <- timeNow - 21600
+    timePast <- timeNow - 86400
     timeR <- c(timePast, timeNow)
 
     ret <- try(get.lsi.xlog(timeR, dirLSIXLOG, dirAWS, dirUP, upload,
@@ -173,9 +173,9 @@ process.rema <- function(dirELAB, dirAWS, dirUP = NULL, upload = TRUE)
         dir.create(dirLOG, showWarnings = FALSE, recursive = TRUE)
     logPROC <- file.path(dirLOG, "processing_log.txt")
 
-    ## operational last 6 hours
+    ## operational last 24 hours
     timeNow <- Sys.time()
-    timePast <- timeNow - 21600
+    timePast <- timeNow - 86400
     timeR <- c(timePast, timeNow)
 
     ret <- try(get.rema(timeR, dirELAB, dirAWS, dirUP, upload,
