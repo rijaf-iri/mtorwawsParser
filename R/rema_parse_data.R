@@ -57,7 +57,7 @@ parse.rema <- function(X, params, dirAWS, dirUP = NULL,
         infoend <- strptime(info$end, "%Y%m%d%H%M%S", tz = "Africa/Kigali")
 
         if(!archive){
-            idaty <- daty >= infoend
+            idaty <- daty >= infoend - 3600
             if(!any(idaty)){
                 updated <- FALSE
                 return("no.update")

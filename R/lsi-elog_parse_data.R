@@ -34,7 +34,7 @@ parse.lsi.elog <- function(X, dirAWS, dirUP = NULL,
 
         if(!archive){
             daty0 <- strptime(daty, "%Y%m%d%H%M%S", tz = "Africa/Kigali")
-            idaty <- daty0 >= infoend
+            idaty <- daty0 >= infoend - 3600
             if(!any(idaty)){
                 updated <- FALSE
                 return("no.update")

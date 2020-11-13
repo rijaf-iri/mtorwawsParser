@@ -36,7 +36,7 @@ parse.lsi.xlog <- function(X, params, dirLSIXLOG, dirAWS,
         if(!archive){
             daty0 <- time_utc2local_char(X$daty, "%Y%m%d%H%M%S")
             daty0 <- strptime(daty0, "%Y%m%d%H%M%S", tz = "Africa/Kigali")
-            idaty <- daty0 >= infoend - 1800
+            idaty <- daty0 >= infoend - 3600
             if(!any(idaty)){
                 updated <- FALSE
                 return("no.update")
