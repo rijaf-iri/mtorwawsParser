@@ -53,22 +53,15 @@ split.date.by.month <- function(start_min, end_min, tz = "Africa/Kigali"){
     daty2 <- strptime(end_min, "%Y-%m-%d %H:%M", tz = tz)
     datys <- seq(daty1, daty2, 'day')
     daty_m <- format(datys, "%Y%m")
-    daty_m0 <- split(seq_along(daty_m), daty_m)
-    nl <- length(daty_m0)
-    daty_s <- lapply(seq_along(daty_m0), function(j){
-        im <- daty_m0[[j]]
+    daty_m <- split(seq_along(daty_m), daty_m)
+    nl <- length(daty_m)
+    daty_s <- lapply(seq_along(daty_m), function(j){
+        im <- daty_m[[j]]
         x <- datys[im]
-        start_d <- if(j == 1) start_min else format(x[1], "%Y-%m-%d %H:%M")
-        if(j == nl){
-            end_d <- end_min
-        }else{
-            end_d <- format(x[length(x)], "%Y-%m-%d")
-            end_d <- paste(end_d, "23:59")
-        }
+        start_d <- if(j == 1) start_min else format(x[1], "%Y-%m-%d 00:00")
+        end_d <- if(j == nl) end_min else format(x[length(x)], "%Y-%m-%d 23:59")
         c(start_d, end_d)
     })
-    daty_s[[1]][1] <- paste(substr(daty_s[[1]][1], 1, 10), format(daty1, "%H:%M"))
-    daty_s[[length(daty_s)]][2] <- paste(substr(daty_s[[length(daty_s)]][2], 1, 10), format(daty2, "%H:%M"))
 
     return(daty_s)
 }
